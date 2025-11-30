@@ -8,6 +8,8 @@ import Payouts from './pages/Payouts'
 import Support from './pages/Support'
 import Settings from './pages/Settings'
 import Login from './pages/Login'
+import Cars from './pages/Cars'
+import Users from './pages/Users'
 
 export default function App() {
   return (
@@ -22,6 +24,8 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Dashboard />} />
             <Route path="/drivers" element={<Drivers />} />
+            <Route path="/cars" element={<Cars />} />
+            <Route path="/users" element={<Users />} />
             <Route path="/trips" element={<Trips />} />
             <Route path="/payouts" element={<Payouts />} />
             <Route path="/support" element={<Support />} />
