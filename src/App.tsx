@@ -12,6 +12,9 @@ import Cars from './pages/Cars'
 import Users from './pages/Users'
 import RequireAdmin from './auth/RequireAdmin'
 import RealtimeProvider from './realtime/RealtimeProvider'
+import Jets from './pages/Jets'
+import JetBookings from './pages/JetBookings'
+import Notifications from './pages/Notifications'
 
 export default function App() {
   return (
@@ -29,6 +32,9 @@ export default function App() {
               <Route path="/drivers" element={<RequireAdmin><Drivers /></RequireAdmin>} />
               <Route path="/cars" element={<RequireAdmin><Cars /></RequireAdmin>} />
               <Route path="/users" element={<RequireAdmin><Users /></RequireAdmin>} />
+              <Route path="/jets" element={<RequireAdmin><Jets /></RequireAdmin>} />
+              <Route path="/jet-bookings" element={<RequireAdmin><JetBookings /></RequireAdmin>} />
+              <Route path="/notifications" element={<RequireAdmin><Notifications /></RequireAdmin>} />
               <Route path="/trips" element={<RequireAdmin><Trips /></RequireAdmin>} />
               <Route path="/payouts" element={<RequireAdmin><Payouts /></RequireAdmin>} />
               <Route path="/support" element={<RequireAdmin><Support /></RequireAdmin>} />

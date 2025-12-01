@@ -51,11 +51,13 @@ export default function Dashboard() {
   const { data: carsCount } = useQuery({ queryKey: ['count', 'cars'], queryFn: () => fetchCount('cars') })
   const { data: authCounts } = useQuery({ queryKey: ['auth_counts'], queryFn: fetchAuthCounts })
   const { data: signupSeries } = useQuery({ queryKey: ['series', 'auth_users'], queryFn: fetchSignupSeries })
+  const { data: jetsCount } = useQuery({ queryKey: ['count', 'jets'], queryFn: () => fetchCount('jets') })
+  const { data: jetBookingsCount } = useQuery({ queryKey: ['count', 'jet_bookings'], queryFn: () => fetchCount('jet_bookings') })
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded border bg-white p-4">
           <div className="text-sm text-gray-500">Total Trips</div>
           <div className="text-2xl font-semibold">{tripsCount ?? '—'}</div>
@@ -75,6 +77,14 @@ export default function Dashboard() {
         <div className="rounded border bg-white p-4">
           <div className="text-sm text-gray-500">Admins</div>
           <div className="text-2xl font-semibold">{authCounts?.admins ?? '—'}</div>
+        </div>
+        <div className="rounded border bg-white p-4">
+          <div className="text-sm text-gray-500">Jets</div>
+          <div className="text-2xl font-semibold">{jetsCount ?? '—'}</div>
+        </div>
+        <div className="rounded border bg-white p-4">
+          <div className="text-sm text-gray-500">Jet Bookings</div>
+          <div className="text-2xl font-semibold">{jetBookingsCount ?? '—'}</div>
         </div>
         <div className="rounded border bg-white p-4">
           <div className="text-sm text-gray-500">Pending Payouts</div>

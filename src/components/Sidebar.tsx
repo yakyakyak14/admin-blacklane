@@ -4,9 +4,12 @@ const links = [
   { to: '/', label: 'Dashboard' },
   { to: '/cars', label: 'Cars' },
   { to: '/users', label: 'Users' },
+  { to: '/jets', label: 'Jets' },
+  { to: '/jet-bookings', label: 'Jet Bookings' },
   { to: '/drivers', label: 'Drivers' },
   { to: '/trips', label: 'Trips' },
   { to: '/payouts', label: 'Payouts' },
+  { to: '/notifications', label: 'Notifications' },
   { to: '/support', label: 'Support' },
   { to: '/settings', label: 'Settings' },
 ]
