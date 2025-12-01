@@ -15,6 +15,7 @@ import RealtimeProvider from './realtime/RealtimeProvider'
 import Jets from './pages/Jets'
 import JetBookings from './pages/JetBookings'
 import Notifications from './pages/Notifications'
+import JetImages from './pages/JetImages'
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
               <Route path="/users" element={<RequireAdmin><Users /></RequireAdmin>} />
               <Route path="/jets" element={<RequireAdmin><Jets /></RequireAdmin>} />
               <Route path="/jet-bookings" element={<RequireAdmin><JetBookings /></RequireAdmin>} />
+              <Route path="/jet-images" element={<RequireAdmin><JetImages /></RequireAdmin>} />
               <Route path="/notifications" element={<RequireAdmin><Notifications /></RequireAdmin>} />
               <Route path="/trips" element={<RequireAdmin><Trips /></RequireAdmin>} />
               <Route path="/payouts" element={<RequireAdmin><Payouts /></RequireAdmin>} />

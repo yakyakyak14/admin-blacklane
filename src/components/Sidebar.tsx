@@ -6,6 +6,7 @@ const links = [
   { to: '/users', label: 'Users' },
   { to: '/jets', label: 'Jets' },
   { to: '/jet-bookings', label: 'Jet Bookings' },
+  { to: '/jet-images', label: 'Jet Images' },
   { to: '/drivers', label: 'Drivers' },
   { to: '/trips', label: 'Trips' },
   { to: '/payouts', label: 'Payouts' },
