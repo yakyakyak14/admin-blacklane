@@ -35,6 +35,14 @@ export default function JetImages() {
   const { data: files, isLoading, error } = useQuery({ queryKey: ['storage', BUCKET], queryFn: listObjects })
   const { data: jets } = useQuery({ queryKey: ['jets', 'basic'], queryFn: listJets })
 
+  const usedUrls = useMemo(() => new Set((jets || []).map(j => j.image_url).filter(Boolean) as string[]), [jets])
+  const unassignedNames = useMemo(() => {
+    return (files || []).filter(f => {
+      const pub = supabase.storage.from(BUCKET).getPublicUrl(f.name).data.publicUrl
+      return !usedUrls.has(pub)
+    }).map(f => f.name)
+  }, [files, usedUrls])
+
   const uploadMutation = useMutation({
     mutationFn: async () => {
       if (!file) return
@@ -44,6 +52,29 @@ export default function JetImages() {
     },
     onSuccess: () => {
       setFile(null)
+      qc.invalidateQueries({ queryKey: ['storage', BUCKET] })
+    },
+  })
+
+  const bulkDeleteUnassigned = useMutation({
+    mutationFn: async () => {
+      if (!unassignedNames.length) return
+      const { error } = await supabase.storage.from(BUCKET).remove(unassignedNames)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['storage', BUCKET] })
+    },
+  })
+
+  const bulkDeleteAll = useMutation({
+    mutationFn: async () => {
+      const all = (files || []).map(f => f.name)
+      if (!all.length) return
+      const { error } = await supabase.storage.from(BUCKET).remove(all)
+      if (error) throw error
+    },
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['storage', BUCKET] })
     },
   })
@@ -100,6 +131,32 @@ export default function JetImages() {
 
       <div className="rounded border bg-white p-4">
         <h2 className="font-semibold mb-3">Bucket Files</h2>
+        <div className="flex items-center justify-between mb-3 text-sm">
+          <div>
+            <span className="mr-3">Total: {(files || []).length}</span>
+            <span>Unassigned: {unassignedNames.length}</span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              className="rounded border px-2 py-1"
+              disabled={!unassignedNames.length || bulkDeleteUnassigned.isPending}
+              onClick={() => {
+                if (confirm(`Delete ${unassignedNames.length} unassigned images?`)) bulkDeleteUnassigned.mutate()
+              }}
+            >
+              {bulkDeleteUnassigned.isPending ? 'Deleting…' : 'Delete Unassigned'}
+            </button>
+            <button
+              className="rounded border px-2 py-1 text-red-600"
+              disabled={!(files || []).length || bulkDeleteAll.isPending}
+              onClick={() => {
+                if (confirm(`Delete ALL ${files?.length || 0} images in jets bucket?`)) bulkDeleteAll.mutate()
+              }}
+            >
+              {bulkDeleteAll.isPending ? 'Deleting…' : 'Delete All'}
+            </button>
+          </div>
+        </div>
         {isLoading && <div>Loading...</div>}
         {error && <div className="text-red-600 text-sm">{(error as any).message}</div>}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -16,11 +16,13 @@ import Jets from './pages/Jets'
 import JetBookings from './pages/JetBookings'
 import Notifications from './pages/Notifications'
 import JetImages from './pages/JetImages'
+import BrandWatermark from './components/BrandWatermark'
 
 export default function App() {
   return (
     <RealtimeProvider>
-      <div className="min-h-screen w-full flex bg-neutral-50">
+      <BrandWatermark />
+      <div className="relative z-10 min-h-screen w-full flex bg-neutral-50">
         <aside className="hidden md:flex w-64 border-r bg-white">
           <Sidebar />
         </aside>
