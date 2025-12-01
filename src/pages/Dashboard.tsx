@@ -30,17 +30,32 @@ async function fetchTripsSeries() {
   return series
 }
 
+async function fetchAuthCounts() {
+  const { data, error } = await supabase.rpc('admin_auth_counts')
+  if (error) return null as any
+  return data as { auth_users: number; admins: number } | null
+}
+
+async function fetchSignupSeries() {
+  const { data, error } = await supabase.rpc('auth_users_per_month')
+  if (error || !data) return [] as Array<{ month: string; signups: number }>
+  return data as Array<{ month: string; signups: number }>
+}
+
 export default function Dashboard() {
   const { data: usersCount } = useQuery({ queryKey: ['count', 'users'], queryFn: () => fetchCount('users') })
   const { data: driversCount } = useQuery({ queryKey: ['count', 'drivers'], queryFn: () => fetchCount('drivers') })
   const { data: tripsCount } = useQuery({ queryKey: ['count', 'trips'], queryFn: () => fetchCount('trips') })
   const { data: payoutsCount } = useQuery({ queryKey: ['count', 'payouts'], queryFn: () => fetchCount('payouts') })
   const { data: tripsSeries } = useQuery({ queryKey: ['series', 'trips'], queryFn: fetchTripsSeries })
+  const { data: carsCount } = useQuery({ queryKey: ['count', 'cars'], queryFn: () => fetchCount('cars') })
+  const { data: authCounts } = useQuery({ queryKey: ['auth_counts'], queryFn: fetchAuthCounts })
+  const { data: signupSeries } = useQuery({ queryKey: ['series', 'auth_users'], queryFn: fetchSignupSeries })
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="rounded border bg-white p-4">
           <div className="text-sm text-gray-500">Total Trips</div>
           <div className="text-2xl font-semibold">{tripsCount ?? '—'}</div>
@@ -50,8 +65,16 @@ export default function Dashboard() {
           <div className="text-2xl font-semibold">{driversCount ?? '—'}</div>
         </div>
         <div className="rounded border bg-white p-4">
-          <div className="text-sm text-gray-500">Users</div>
-          <div className="text-2xl font-semibold">{usersCount ?? '—'}</div>
+          <div className="text-sm text-gray-500">Cars</div>
+          <div className="text-2xl font-semibold">{carsCount ?? '—'}</div>
+        </div>
+        <div className="rounded border bg-white p-4">
+          <div className="text-sm text-gray-500">Auth Users</div>
+          <div className="text-2xl font-semibold">{authCounts?.auth_users ?? '—'}</div>
+        </div>
+        <div className="rounded border bg-white p-4">
+          <div className="text-sm text-gray-500">Admins</div>
+          <div className="text-2xl font-semibold">{authCounts?.admins ?? '—'}</div>
         </div>
         <div className="rounded border bg-white p-4">
           <div className="text-sm text-gray-500">Pending Payouts</div>
@@ -71,7 +94,18 @@ export default function Dashboard() {
             </LineChart>
           </ResponsiveContainer>
         </div>
-        <div className="rounded border bg-white p-4 h-80">Revenue Chart (coming soon)</div>
+        <div className="rounded border bg-white p-4 h-80">
+          <div className="mb-2 font-semibold">Signups over time</div>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={signupSeries || []} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Line type="monotone" dataKey="signups" stroke="#0f766e" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   )
