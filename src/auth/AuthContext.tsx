@@ -27,8 +27,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(data.session)
       setUser(data.session?.user ?? null)
       if (data.session?.user) {
+        let allowed = false
         const { data: rpcData } = await supabase.rpc('is_admin')
-        if (active) setIsAdmin(Boolean(rpcData))
+        allowed = Boolean(rpcData)
+        if (!allowed && data.session.user.email) {
+          const { data: allowedByEmail } = await supabase.rpc('is_admin_email', { p_email: data.session.user.email })
+          allowed = Boolean(allowedByEmail)
+        }
+        if (active) setIsAdmin(allowed)
       } else {
         setIsAdmin(false)
       }
@@ -41,8 +47,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(sess)
       setUser(sess?.user ?? null)
       if (sess?.user) {
+        let allowed = false
         const { data: rpcData } = await supabase.rpc('is_admin')
-        setIsAdmin(Boolean(rpcData))
+        allowed = Boolean(rpcData)
+        if (!allowed && sess.user.email) {
+          const { data: allowedByEmail } = await supabase.rpc('is_admin_email', { p_email: sess.user.email })
+          allowed = Boolean(allowedByEmail)
+        }
+        setIsAdmin(allowed)
       } else {
         setIsAdmin(false)
       }
