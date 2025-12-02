@@ -36,7 +36,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         if (active) setIsAdmin(allowed)
       } else {
-        setIsAdmin(false)
+        // No Supabase session: check local admin override (email + passcode flow)
+        try {
+          const localFlag = typeof window !== 'undefined' && window.localStorage.getItem('admin_session') === 'true'
+          const localEmail = typeof window !== 'undefined' ? window.localStorage.getItem('admin_email') : null
+          if (localFlag && localEmail) {
+            const { data: allowedByEmail } = await supabase.rpc('is_admin_email', { p_email: localEmail })
+            if (active) setIsAdmin(Boolean(allowedByEmail))
+          } else {
+            setIsAdmin(false)
+          }
+        } catch {
+          setIsAdmin(false)
+        }
       }
       setLoading(false)
     }
@@ -56,7 +68,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         setIsAdmin(allowed)
       } else {
-        setIsAdmin(false)
+        try {
+          const localFlag = typeof window !== 'undefined' && window.localStorage.getItem('admin_session') === 'true'
+          const localEmail = typeof window !== 'undefined' ? window.localStorage.getItem('admin_email') : null
+          if (localFlag && localEmail) {
+            const { data: allowedByEmail } = await supabase.rpc('is_admin_email', { p_email: localEmail })
+            setIsAdmin(Boolean(allowedByEmail))
+          } else {
+            setIsAdmin(false)
+          }
+        } catch {
+          setIsAdmin(false)
+        }
       }
     })
 

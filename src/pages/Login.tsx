@@ -36,20 +36,21 @@ export default function Login() {
         setError('This email does not have admin permission.')
         return
       }
-      const { error: signInError } = await supabase.auth.signInWithOtp({
-        email: emailTrim,
-        options: { emailRedirectTo: window.location.origin },
-      })
-      if (signInError) throw signInError
-      setMessage('Check your email for a sign-in link to continue.')
+      // Grant local admin session without sending any email link
+      try {
+        window.localStorage.setItem('admin_email', emailTrim)
+        window.localStorage.setItem('admin_session', 'true')
+      } catch {}
+      setMessage('Access granted. Redirecting...')
+      // Navigate will occur automatically when AuthContext marks isAdmin
     } catch (e: any) {
-      setError(e?.message || 'Failed to initiate sign-in.')
+      setError(e?.message || 'Login failed.')
     } finally {
       setSubmitting(false)
     }
   }
 
-  if (!loading && (user && isAdmin)) {
+  if (!loading && isAdmin) {
     return <Navigate to={from} replace />
   }
 

@@ -6,3 +6,7 @@
 - Preview: `npm run preview`
 
 Requires environment variables in `.env.local`.
+
+## Attribution
+
+Developed by Hope Ukpai of WYN Tech.
