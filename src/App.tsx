@@ -16,6 +16,7 @@ import Jets from './pages/Jets'
 import JetBookings from './pages/JetBookings'
 import Notifications from './pages/Notifications'
 import JetImages from './pages/JetImages'
+import Bookings from './pages/Bookings'
 import BrandWatermark from './components/BrandWatermark'
 
 export default function App() {
@@ -33,6 +34,7 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/" element={<RequireAdmin><Dashboard /></RequireAdmin>} />
               <Route path="/drivers" element={<RequireAdmin><Drivers /></RequireAdmin>} />
+              <Route path="/bookings" element={<RequireAdmin><Bookings /></RequireAdmin>} />
               <Route path="/cars" element={<RequireAdmin><Cars /></RequireAdmin>} />
               <Route path="/users" element={<RequireAdmin><Users /></RequireAdmin>} />
               <Route path="/jets" element={<RequireAdmin><Jets /></RequireAdmin>} />

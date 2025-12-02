@@ -18,7 +18,12 @@ async function fetchAuthUsers() {
 }
 
 export default function Users() {
-  const { data: users, isLoading, error } = useQuery({ queryKey: ['users'], queryFn: fetchAuthUsers })
+  const { data: users, isLoading, error } = useQuery({
+    queryKey: ['users'],
+    queryFn: fetchAuthUsers,
+    refetchInterval: 20000,
+    refetchIntervalInBackground: true,
+  })
 
   return (
     <div className="space-y-6">

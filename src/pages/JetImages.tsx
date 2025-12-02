@@ -14,6 +14,7 @@ type FileItem = {
 }
 
 type Jet = { id: string; make: string; model: string | null; image_url: string | null }
+type JetImage = { id: string; jet_id: string; url: string; created_at: string }
 
 async function listObjects() {
   const { data, error } = await supabase.storage.from(BUCKET).list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
@@ -27,6 +28,15 @@ async function listJets() {
   return (data || []) as Jet[]
 }
 
+async function listJetImages() {
+  const { data, error } = await supabase
+    .from('jet_images')
+    .select('id, jet_id, url, created_at')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data || []) as JetImage[]
+}
+
 export default function JetImages() {
   const qc = useQueryClient()
   const [file, setFile] = useState<File | null>(null)
@@ -34,6 +44,7 @@ export default function JetImages() {
   const [renameTo, setRenameTo] = useState<string>('')
   const { data: files, isLoading, error } = useQuery({ queryKey: ['storage', BUCKET], queryFn: listObjects })
   const { data: jets } = useQuery({ queryKey: ['jets', 'basic'], queryFn: listJets })
+  const { data: gallery } = useQuery({ queryKey: ['jet_images'], queryFn: listJetImages })
 
   const usedUrls = useMemo(() => new Set((jets || []).map(j => j.image_url).filter(Boolean) as string[]), [jets])
   const unassignedNames = useMemo(() => {
@@ -55,6 +66,36 @@ export default function JetImages() {
       qc.invalidateQueries({ queryKey: ['storage', BUCKET] })
     },
   })
+
+  const addToGalleryMutation = useMutation({
+    mutationFn: async ({ jetId, url }: { jetId: string; url: string }) => {
+      const { error } = await supabase.from('jet_images').insert({ jet_id: jetId, url })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['jet_images'] })
+    },
+  })
+
+  const deleteGalleryImage = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('jet_images').delete().eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['jet_images'] })
+    },
+  })
+
+  const imagesByJet = useMemo(() => {
+    const m = new Map<string, JetImage[]>()
+    ;(gallery || []).forEach((img) => {
+      const arr = m.get(img.jet_id) || []
+      arr.push(img)
+      m.set(img.jet_id, arr)
+    })
+    return m
+  }, [gallery])
 
   const bulkDeleteUnassigned = useMutation({
     mutationFn: async () => {
@@ -190,10 +231,53 @@ export default function JetImages() {
                       <a className="rounded border px-2 py-1 text-xs" href={pub} target="_blank" rel="noreferrer">Open</a>
                     </div>
                   </div>
+
+                  <div className="pt-2">
+                    <div className="text-xs text-gray-500 mb-1">Add to Jet Gallery</div>
+                    <select
+                      className="rounded border px-2 py-1 w-full text-sm"
+                      defaultValue=""
+                      onChange={(e) => e.target.value && addToGalleryMutation.mutate({ jetId: e.target.value, url: pub })}
+                    >
+                      <option value="" disabled>Select a jet…</option>
+                      {jets?.map(j => (
+                        <option key={j.id} value={j.id}>{j.make} {j.model ?? ''}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             )
           })}
+        </div>
+      </div>
+
+      <div className="rounded border bg-white p-4">
+        <h2 className="font-semibold mb-3">Jet Galleries</h2>
+        <div className="space-y-6">
+          {Array.from(imagesByJet.entries()).map(([jetId, imgs]) => {
+            const j = (jets || []).find(x => x.id === jetId)
+            const title = j ? `${j.make} ${j.model ?? ''}`.trim() : jetId
+            return (
+              <div key={jetId} className="border rounded">
+                <div className="px-3 py-2 font-medium bg-gray-50 border-b">{title} • {imgs.length} image(s)</div>
+                <div className="p-3 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {imgs.map(im => (
+                    <div key={im.id} className="rounded border overflow-hidden">
+                      <div className="aspect-video bg-gray-100">
+                        <img src={im.url} alt={title} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="p-2 flex items-center justify-between text-xs">
+                        <span>{new Date(im.created_at).toLocaleString()}</span>
+                        <button className="rounded border px-2 py-1 text-red-600" onClick={() => deleteGalleryImage.mutate(im.id)}>Remove</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+          {!imagesByJet.size && <div className="text-sm text-gray-600">No gallery images added yet.</div>}
         </div>
       </div>
 
