@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
 interface JetBookingRow {
@@ -25,8 +26,22 @@ async function fetchJetBookings() {
   return (data || []) as JetBookingRow[]
 }
 
+interface AuthUserRow { id: string; email: string | null }
+async function fetchAuthUsers() {
+  const { data, error } = await supabase.rpc('admin_list_auth_users')
+  if (error) throw error
+  return ((data || []) as any[]).map((u) => ({ id: u.id as string, email: (u.email as string) ?? null })) as AuthUserRow[]
+}
+
 export default function JetBookings() {
   const { data: bookings, isLoading, error } = useQuery({ queryKey: ['jet_bookings'], queryFn: fetchJetBookings })
+  const { data: users } = useQuery({ queryKey: ['auth_users_min'], queryFn: fetchAuthUsers, staleTime: 30000, refetchInterval: 60000 })
+
+  const emailById = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const u of users || []) if (u.email) m.set(u.id, u.email)
+    return m
+  }, [users])
 
   return (
     <div className="space-y-6">
@@ -52,7 +67,7 @@ export default function JetBookings() {
               {bookings?.map((b) => (
                 <tr key={b.id} className="border-b">
                   <td className="px-2 py-2">{b.created_at ? new Date(b.created_at).toLocaleString() : '—'}</td>
-                  <td className="px-2 py-2">{b.user_id || '—'}</td>
+                  <td className="px-2 py-2">{(b.user_id && emailById.get(b.user_id)) || b.user_id || '—'}</td>
                   <td className="px-2 py-2">{b.jets ? `${b.jets.make} ${b.jets.model}` : b.jet_id || '—'}</td>
                   <td className="px-2 py-2">{b.from_airport || '—'}</td>
                   <td className="px-2 py-2">{b.to_airport || '—'}</td>

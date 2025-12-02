@@ -31,18 +31,29 @@ export default function Login() {
     }
     try {
       setSubmitting(true)
-      const { data: allowed } = await supabase.rpc('is_admin_email', { p_email: emailTrim })
-      if (!allowed) {
-        setError('This email does not have admin permission.')
+      // Sign in with password (passcode)
+      const { error: pwError } = await supabase.auth.signInWithPassword({
+        email: emailTrim,
+        password: accessCode.trim(),
+      })
+      if (pwError) {
+        setError('Invalid email or passcode.')
         return
       }
-      // Grant local admin session without sending any email link
-      try {
-        window.localStorage.setItem('admin_email', emailTrim)
-        window.localStorage.setItem('admin_session', 'true')
-      } catch {}
+      // Verify admin permission post-auth
+      let allowed = false
+      const { data: rpcData } = await supabase.rpc('is_admin')
+      allowed = Boolean(rpcData)
+      if (!allowed) {
+        const { data: allowedByEmail } = await supabase.rpc('is_admin_email', { p_email: emailTrim })
+        allowed = Boolean(allowedByEmail)
+      }
+      if (!allowed) {
+        await supabase.auth.signOut()
+        setError('This account does not have admin permission.')
+        return
+      }
       setMessage('Access granted. Redirecting...')
-      // Navigate will occur automatically when AuthContext marks isAdmin
     } catch (e: any) {
       setError(e?.message || 'Login failed.')
     } finally {
