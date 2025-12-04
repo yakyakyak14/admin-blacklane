@@ -1,1 +1,1 @@
-feat(admin): login email+passcode and strict admin-only gating
+feat(admin): replace navbar logo with local PNG and set watermark opacity to 35%

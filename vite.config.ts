@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@mainassets': path.resolve(__dirname, '../src/assets'),
+      '@rootpublic': path.resolve(__dirname, '../public'),
     },
   },
   server: {

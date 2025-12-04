@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
+import logoPng from '../../blacklane-logo.png'
 
 async function fetchCount(table: string): Promise<number> {
   const { count, error } = await supabase.from(table).select('*', { count: 'exact', head: true })
@@ -9,8 +10,7 @@ async function fetchCount(table: string): Promise<number> {
 
 export function AdminNavbar() {
   const homeUrl = (import.meta as any).env?.VITE_MAIN_APP_URL || '/'
-  const defaultLogo = 'https://raw.githubusercontent.com/yakyakyak14/blacklane-suvs/main/src/assets/Blacklane__logoo_png.png'
-  const logoUrl = (import.meta as any).env?.VITE_BRAND_LOGO_URL || defaultLogo
+  const logoUrl = logoPng
 
   const { data: jetCount } = useQuery({ queryKey: ['count', 'jet_bookings'], queryFn: () => fetchCount('jet_bookings') })
   const { data: tripCount } = useQuery({ queryKey: ['count', 'trips'], queryFn: () => fetchCount('trips') })
