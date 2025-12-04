@@ -25,35 +25,27 @@ export default function Login() {
       setError('Enter a valid email address.')
       return
     }
-    if (accessCode.trim() !== '24681012') {
+    if (accessCode.trim() !== '24682012') {
       setError('Invalid passcode.')
       return
     }
     try {
       setSubmitting(true)
-      // Sign in with password (passcode)
-      const { error: pwError } = await supabase.auth.signInWithPassword({
-        email: emailTrim,
-        password: accessCode.trim(),
-      })
-      if (pwError) {
-        setError('Invalid email or passcode.')
+      const { data: allowed } = await supabase.rpc('is_admin_email', { p_email: emailTrim })
+      if (!allowed) {
+        setError('This email does not have admin permission.')
         return
       }
-      // Verify admin permission post-auth
-      let allowed = false
-      const { data: rpcData } = await supabase.rpc('is_admin')
-      allowed = Boolean(rpcData)
-      if (!allowed) {
-        const { data: allowedByEmail } = await supabase.rpc('is_admin_email', { p_email: emailTrim })
-        allowed = Boolean(allowedByEmail)
-      }
-      if (!allowed) {
-        await supabase.auth.signOut()
-        setError('This account does not have admin permission.')
-        return
-      }
+      try {
+        window.localStorage.setItem('admin_email', emailTrim)
+        window.localStorage.setItem('admin_session', 'true')
+      } catch {}
       setMessage('Access granted. Redirecting...')
+      setTimeout(() => {
+        try {
+          window.location.assign(from)
+        } catch {}
+      }, 500)
     } catch (e: any) {
       setError(e?.message || 'Login failed.')
     } finally {

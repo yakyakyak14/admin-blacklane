@@ -12,9 +12,15 @@ interface AuthUserRow {
 }
 
 async function fetchAuthUsers() {
-  const { data, error } = await supabase.rpc('admin_list_auth_users')
+  let p_admin_email: string | null = null
+  try {
+    const localFlag = typeof window !== 'undefined' && window.localStorage.getItem('admin_session') === 'true'
+    const localEmail = typeof window !== 'undefined' ? window.localStorage.getItem('admin_email') : null
+    if (localFlag && localEmail) p_admin_email = localEmail
+  } catch {}
+  const { data, error } = await supabase.rpc('admin_list_auth_users', { p_admin_email })
   if (error) throw error
-  return (data || []) as AuthUserRow[]
+  return (data ?? []) as unknown as AuthUserRow[]
 }
 
 export default function Users() {
