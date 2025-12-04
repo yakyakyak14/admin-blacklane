@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
 import logoPng from '../../blacklane-logo.png'
+import { MessageCircle } from 'lucide-react'
 
 async function fetchCount(table: string): Promise<number> {
   const { count, error } = await supabase.from(table).select('*', { count: 'exact', head: true })
@@ -42,6 +43,10 @@ export function AdminNavbar() {
           </a>
           <a href="/notifications" className="rounded border px-2 py-1 bg-white hover:bg-gray-50">
             Notifications <span className="ml-1 inline-block rounded bg-black text-white px-1">{notifCount ?? 0}</span>
+          </a>
+          <a href="https://wa.me/2348108971777" target="_blank" rel="noreferrer" className="rounded border px-2 py-1 bg-white hover:bg-gray-50 inline-flex items-center gap-1">
+            <MessageCircle size={14} />
+            WhatsApp
           </a>
         </nav>
       </div>
