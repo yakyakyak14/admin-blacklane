@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useState } from 'react'
 import { Sidebar } from './components/Sidebar'
 import { AdminNavbar } from './components/AdminNavbar'
 import Dashboard from './pages/Dashboard'
@@ -18,11 +19,14 @@ import Notifications from './pages/Notifications'
 import JetImages from './pages/JetImages'
 import Bookings from './pages/Bookings'
 import BrandWatermark from './components/BrandWatermark'
+import SplashScreen from './components/SplashScreen'
 
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false)
   return (
     <RealtimeProvider>
       <BrandWatermark />
+      {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
       <div className="relative z-10 min-h-screen w-full flex bg-neutral-50">
         <aside className="hidden md:flex w-64 border-r bg-white">
           <Sidebar />
